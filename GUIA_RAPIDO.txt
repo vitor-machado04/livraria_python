@@ -1,0 +1,43 @@
+🏃‍♂️ GUIA RÁPIDO - Sistema de Livraria
+=======================================
+
+📋 COMO USAR:
+1. Execute: python main.py
+2. Escolha uma opção do menu (1-9)
+3. Siga as instruções na tela
+
+🚀 PRIMEIRO USO:
+- Execute: python demo.py
+- Isso criará 15 livros de exemplo no banco
+
+🎯 PRINCIPAIS FUNCIONALIDADES:
+✅ Adicionar livros com validação automática
+✅ Listar todos os livros organizadamente  
+✅ Buscar livros por autor
+✅ Atualizar preços facilmente
+✅ Remover livros com confirmação
+✅ Exportar dados para CSV
+✅ Importar dados de CSV
+✅ Backup automático antes de mudanças
+✅ Limpeza automática de backups antigos
+
+💡 DICAS:
+• Preços podem ser digitados como 29,90 ou 29.90
+• Busca por autor é parcial (ex: "Machado" encontra "Machado de Assis")
+• Sistema cria backup automaticamente antes de modificações
+• Apenas os 5 backups mais recentes são mantidos
+• Arquivos CSV devem estar no diretório exports/
+
+📁 ESTRUTURA CRIADA:
+meu_sistema_livraria/
+├── data/livraria.db          # Banco principal
+├── backups/backup_*.db       # Backups automáticos
+├── exports/*.csv             # Arquivos CSV
+├── main.py                   # Execute este arquivo
+├── sistema_livraria.py       # Sistema completo
+└── demo.py                   # Dados de exemplo
+
+❓ PROBLEMAS?
+• Verifique se tem Python 3.6+
+• Execute no diretório do projeto
+• Veja README.md para detalhes completos

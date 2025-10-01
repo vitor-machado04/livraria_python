@@ -1,0 +1,16 @@
+# Sistema de Gerenciamento de Livraria
+# 
+# Este projeto usa apenas bibliotecas padrão do Python
+# Não há dependências externas necessárias
+#
+# Requisitos:
+# - Python 3.6 ou superior
+#
+# Bibliotecas utilizadas (todas padrão):
+# - sqlite3 (banco de dados)
+# - csv (manipulação de arquivos CSV)
+# - os (operações do sistema operacional)  
+# - pathlib (manipulação de caminhos)
+# - shutil (operações de arquivos)
+# - datetime (manipulação de datas)
+# - typing (type hints)
