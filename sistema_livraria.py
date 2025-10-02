@@ -1,12 +1,3 @@
-"""
-Sistema de Gerenciamento de Livraria
-Autor: Sistema de Livraria
-Data: 19/09/2025
-
-Este sistema gerencia uma livraria com funcionalidades completas de CRUD,
-backup, importação/exportação CSV e validação de dados.
-"""
-
 import sqlite3
 import csv
 import os
@@ -22,11 +13,8 @@ class ValidationError(Exception):
 
 
 class Validador:
-    """Classe responsável pela validação de dados de entrada"""
-    
     @staticmethod
     def validar_titulo(titulo: str) -> str:
-        """Valida e limpa o título do livro"""
         if not titulo or not titulo.strip():
             raise ValidationError("O título não pode estar vazio")
         titulo = titulo.strip()
@@ -36,7 +24,6 @@ class Validador:
     
     @staticmethod
     def validar_autor(autor: str) -> str:
-        """Valida e limpa o nome do autor"""
         if not autor or not autor.strip():
             raise ValidationError("O nome do autor não pode estar vazio")
         autor = autor.strip()
@@ -46,7 +33,6 @@ class Validador:
     
     @staticmethod
     def validar_ano(ano: str) -> int:
-        """Valida e converte o ano de publicação"""
         try:
             ano_int = int(ano)
             if ano_int < 1000 or ano_int > datetime.now().year + 1:
@@ -57,7 +43,6 @@ class Validador:
     
     @staticmethod
     def validar_preco(preco: str) -> float:
-        """Valida e converte o preço"""
         try:
             # Substitui vírgula por ponto para aceitar formato brasileiro
             preco = preco.replace(',', '.')
@@ -72,8 +57,6 @@ class Validador:
 
 
 class GerenciadorArquivos:
-    """Classe responsável pelo gerenciamento de arquivos e diretórios"""
-    
     def __init__(self, diretorio_base: str):
         self.diretorio_base = Path(diretorio_base)
         self.diretorio_data = self.diretorio_base / "data"
@@ -85,12 +68,10 @@ class GerenciadorArquivos:
         self._criar_diretorios()
     
     def _criar_diretorios(self):
-        """Cria a estrutura de diretórios necessária"""
         for diretorio in [self.diretorio_data, self.diretorio_backups, self.diretorio_exports]:
             diretorio.mkdir(parents=True, exist_ok=True)
     
     def criar_backup(self) -> str:
-        """Cria um backup do banco de dados e retorna o caminho do arquivo"""
         if not self.arquivo_db.exists():
             raise FileNotFoundError("Banco de dados não encontrado para backup")
         
@@ -106,7 +87,6 @@ class GerenciadorArquivos:
         return str(caminho_backup)
     
     def _limpar_backups_antigos(self):
-        """Mantém apenas os 5 backups mais recentes"""
         backups = list(self.diretorio_backups.glob("backup_livraria_*.db"))
         backups.sort(key=lambda x: x.stat().st_mtime, reverse=True)
         
@@ -116,7 +96,6 @@ class GerenciadorArquivos:
             print(f"Backup antigo removido: {backup_antigo.name}")
     
     def exportar_csv(self, dados: List[Tuple], nome_arquivo: str = "livros_exportados.csv") -> str:
-        """Exporta dados para um arquivo CSV"""
         caminho_csv = self.diretorio_exports / nome_arquivo
         
         with open(caminho_csv, 'w', newline='', encoding='utf-8') as arquivo:
@@ -129,7 +108,6 @@ class GerenciadorArquivos:
         return str(caminho_csv)
     
     def importar_csv(self, nome_arquivo: str) -> List[Dict]:
-        """Importa dados de um arquivo CSV"""
         caminho_csv = self.diretorio_exports / nome_arquivo
         
         if not caminho_csv.exists():
@@ -150,14 +128,11 @@ class GerenciadorArquivos:
 
 
 class DatabaseManager:
-    """Classe responsável pelo gerenciamento do banco de dados SQLite"""
-    
     def __init__(self, caminho_db: str):
         self.caminho_db = caminho_db
         self._criar_tabela()
     
     def _criar_tabela(self):
-        """Cria a tabela de livros se ela não existir"""
         with sqlite3.connect(self.caminho_db) as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -172,7 +147,6 @@ class DatabaseManager:
             conn.commit()
     
     def adicionar_livro(self, titulo: str, autor: str, ano_publicacao: int, preco: float) -> int:
-        """Adiciona um novo livro ao banco de dados"""
         with sqlite3.connect(self.caminho_db) as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -183,14 +157,12 @@ class DatabaseManager:
             return cursor.lastrowid
     
     def obter_todos_livros(self) -> List[Tuple]:
-        """Retorna todos os livros do banco de dados"""
         with sqlite3.connect(self.caminho_db) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM livros ORDER BY titulo')
             return cursor.fetchall()
     
     def buscar_livros_por_autor(self, autor: str) -> List[Tuple]:
-        """Busca livros por autor (busca parcial, case-insensitive)"""
         with sqlite3.connect(self.caminho_db) as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -201,7 +173,6 @@ class DatabaseManager:
             return cursor.fetchall()
     
     def atualizar_preco_livro(self, id_livro: int, novo_preco: float) -> bool:
-        """Atualiza o preço de um livro"""
         with sqlite3.connect(self.caminho_db) as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -211,7 +182,6 @@ class DatabaseManager:
             return cursor.rowcount > 0
     
     def remover_livro(self, id_livro: int) -> bool:
-        """Remove um livro do banco de dados"""
         with sqlite3.connect(self.caminho_db) as conn:
             cursor = conn.cursor()
             cursor.execute('DELETE FROM livros WHERE id = ?', (id_livro,))
@@ -219,7 +189,6 @@ class DatabaseManager:
             return cursor.rowcount > 0
     
     def obter_livro_por_id(self, id_livro: int) -> Optional[Tuple]:
-        """Retorna um livro específico pelo ID"""
         with sqlite3.connect(self.caminho_db) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM livros WHERE id = ?', (id_livro,))
@@ -227,23 +196,19 @@ class DatabaseManager:
 
 
 class SistemaLivraria:
-    """Classe principal do sistema de gerenciamento da livraria"""
-    
     def __init__(self, diretorio_base: str = "meu_sistema_livraria"):
         self.gerenciador_arquivos = GerenciadorArquivos(diretorio_base)
         self.db_manager = DatabaseManager(str(self.gerenciador_arquivos.arquivo_db))
         self.validador = Validador()
     
     def _fazer_backup_automatico(self):
-        """Cria um backup automático antes de modificações"""
         try:
             backup_path = self.gerenciador_arquivos.criar_backup()
             print(f"✓ Backup criado automaticamente: {Path(backup_path).name}")
         except Exception as e:
-            print(f"⚠ Aviso: Não foi possível criar backup: {e}")
+            print(f"Aviso: Não foi possível criar backup: {e}")
     
     def adicionar_livro(self):
-        """Interface para adicionar um novo livro"""
         print("\n=== ADICIONAR NOVO LIVRO ===")
         
         try:
@@ -272,12 +237,11 @@ class SistemaLivraria:
             print(f"  Preço: R$ {preco:.2f}")
             
         except ValidationError as e:
-            print(f"\n❌ Erro de validação: {e}")
+            print(f"\nErro de validação: {e}")
         except Exception as e:
-            print(f"\n❌ Erro ao adicionar livro: {e}")
+            print(f"\nErro ao adicionar livro: {e}")
     
     def exibir_todos_livros(self):
-        """Exibe todos os livros cadastrados"""
         print("\n=== TODOS OS LIVROS CADASTRADOS ===")
         
         try:
@@ -298,10 +262,9 @@ class SistemaLivraria:
                 print(f"{id_livro:<5} {titulo_truncado:<30} {autor_truncado:<25} {ano:<6} R$ {preco:<7.2f}")
             
         except Exception as e:
-            print(f"❌ Erro ao exibir livros: {e}")
+            print(f"Erro ao exibir livros: {e}")
     
     def atualizar_preco_livro(self):
-        """Interface para atualizar o preço de um livro"""
         print("\n=== ATUALIZAR PREÇO DE LIVRO ===")
         
         try:
@@ -309,13 +272,13 @@ class SistemaLivraria:
             try:
                 id_livro = int(id_livro)
             except ValueError:
-                print("❌ ID deve ser um número inteiro")
+                print("ID deve ser um número inteiro")
                 return
             
             # Verificar se o livro existe
             livro = self.db_manager.obter_livro_por_id(id_livro)
             if not livro:
-                print(f"❌ Livro com ID {id_livro} não encontrado")
+                print(f"Livro com ID {id_livro} não encontrado")
                 return
             
             # Exibir informações atuais
@@ -338,15 +301,14 @@ class SistemaLivraria:
                 print(f"  Preço anterior: R$ {preco_atual:.2f}")
                 print(f"  Novo preço: R$ {novo_preco:.2f}")
             else:
-                print(f"❌ Erro ao atualizar preço")
+                print(f"Erro ao atualizar preço")
             
         except ValidationError as e:
-            print(f"\n❌ Erro de validação: {e}")
+            print(f"\nErro de validação: {e}")
         except Exception as e:
-            print(f"\n❌ Erro ao atualizar preço: {e}")
+            print(f"\nErro ao atualizar preço: {e}")
     
     def remover_livro(self):
-        """Interface para remover um livro"""
         print("\n=== REMOVER LIVRO ===")
         
         try:
@@ -354,13 +316,13 @@ class SistemaLivraria:
             try:
                 id_livro = int(id_livro)
             except ValueError:
-                print("❌ ID deve ser um número inteiro")
+                print("ID deve ser um número inteiro")
                 return
             
             # Verificar se o livro existe
             livro = self.db_manager.obter_livro_por_id(id_livro)
             if not livro:
-                print(f"❌ Livro com ID {id_livro} não encontrado")
+                print(f"Livro com ID {id_livro} não encontrado")
                 return
             
             # Exibir informações do livro
@@ -384,19 +346,18 @@ class SistemaLivraria:
             if self.db_manager.remover_livro(id_livro):
                 print(f"\n✓ Livro removido com sucesso!")
             else:
-                print(f"❌ Erro ao remover livro")
+                print(f"Erro ao remover livro")
             
         except Exception as e:
-            print(f"\n❌ Erro ao remover livro: {e}")
+            print(f"\nErro ao remover livro: {e}")
     
     def buscar_livros_por_autor(self):
-        """Interface para buscar livros por autor"""
         print("\n=== BUSCAR LIVROS POR AUTOR ===")
         
         try:
             autor = input("Nome do autor (busca parcial): ").strip()
             if not autor:
-                print("❌ Nome do autor não pode estar vazio")
+                print("Nome do autor não pode estar vazio")
                 return
             
             livros = self.db_manager.buscar_livros_por_autor(autor)
@@ -416,10 +377,9 @@ class SistemaLivraria:
                 print(f"{id_livro:<5} {titulo_truncado:<30} {autor_truncado:<25} {ano:<6} R$ {preco:<7.2f}")
             
         except Exception as e:
-            print(f"❌ Erro ao buscar livros: {e}")
+            print(f"Erro ao buscar livros: {e}")
     
     def exportar_dados_csv(self):
-        """Interface para exportar dados para CSV"""
         print("\n=== EXPORTAR DADOS PARA CSV ===")
         
         try:
@@ -442,10 +402,9 @@ class SistemaLivraria:
             print(f"  Total de livros exportados: {len(livros)}")
             
         except Exception as e:
-            print(f"❌ Erro ao exportar dados: {e}")
+            print(f"Erro ao exportar dados: {e}")
     
     def importar_dados_csv(self):
-        """Interface para importar dados de CSV"""
         print("\n=== IMPORTAR DADOS DE CSV ===")
         
         try:
@@ -468,7 +427,7 @@ class SistemaLivraria:
                 if 0 <= indice < len(arquivos_csv):
                     nome_arquivo = arquivos_csv[indice].name
                 else:
-                    print("❌ Número inválido")
+                    print("Número inválido")
                     return
             elif not nome_arquivo.endswith('.csv'):
                 nome_arquivo += '.csv'
@@ -511,7 +470,7 @@ class SistemaLivraria:
                     
                 except Exception as e:
                     livros_erro += 1
-                    print(f"❌ Erro ao importar livro '{livro.get('titulo', 'N/A')}': {e}")
+                    print(f"Erro ao importar livro '{livro.get('titulo', 'N/A')}': {e}")
             
             print(f"\n✓ Importação concluída!")
             print(f"  Livros importados: {livros_importados}")
@@ -519,12 +478,11 @@ class SistemaLivraria:
                 print(f"  Livros com erro: {livros_erro}")
             
         except FileNotFoundError as e:
-            print(f"❌ Arquivo não encontrado: {e}")
+            print(f"Arquivo não encontrado: {e}")
         except Exception as e:
-            print(f"❌ Erro ao importar dados: {e}")
+            print(f"Erro ao importar dados: {e}")
     
     def fazer_backup_manual(self):
-        """Interface para fazer backup manual"""
         print("\n=== FAZER BACKUP DO BANCO DE DADOS ===")
         
         try:
@@ -534,10 +492,9 @@ class SistemaLivraria:
             print(f"  Localização: {backup_path}")
             
         except Exception as e:
-            print(f"❌ Erro ao criar backup: {e}")
+            print(f"Erro ao criar backup: {e}")
     
     def executar(self):
-        """Método principal para executar o sistema"""
         print("="*60)
         print("    SISTEMA DE GERENCIAMENTO DE LIVRARIA")
         print("="*60)
@@ -586,7 +543,7 @@ class SistemaLivraria:
                     print("="*50)
                     break
                 else:
-                    print("\n❌ Opção inválida. Por favor, escolha uma opção de 1 a 9.")
+                    print("\nOpção inválida. Por favor, escolha uma opção de 1 a 9.")
                 
                 # Pausa para o usuário ler a saída
                 if opcao in ['1', '2', '3', '4', '5', '6', '7', '8']:
@@ -597,7 +554,7 @@ class SistemaLivraria:
                 print("Até logo!")
                 break
             except Exception as e:
-                print(f"\n❌ Erro inesperado: {e}")
+                print(f"\nErro inesperado: {e}")
                 input("Pressione Enter para continuar...")
 
 

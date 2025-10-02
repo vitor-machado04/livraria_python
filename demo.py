@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
-"""
-Script de demonstração para popular o banco de dados com livros de exemplo
-"""
-
 from sistema_livraria import SistemaLivraria
 
 def popular_banco_demonstracao():
-    """Popula o banco de dados com livros de demonstração"""
-    
     # Lista de livros clássicos brasileiros para demonstração
     livros_exemplo = [
         ("Dom Casmurro", "Machado de Assis", 1899, 29.90),
@@ -52,7 +46,7 @@ def popular_banco_demonstracao():
                 livros_adicionados += 1
                 print(f"✓ {livros_adicionados:2d}. {titulo} - {autor}")
             except Exception as e:
-                print(f"❌ Erro ao adicionar '{titulo}': {e}")
+                print(f"Erro ao adicionar '{titulo}': {e}")
         
         print(f"\n✓ Demonstração concluída!")
         print(f"  Livros adicionados: {livros_adicionados}")
@@ -74,7 +68,7 @@ def popular_banco_demonstracao():
         print(f"  Ou: python sistema_livraria.py")
         
     except Exception as e:
-        print(f"❌ Erro durante a demonstração: {e}")
+        print(f"Erro durante a demonstração: {e}")
 
 if __name__ == "__main__":
     popular_banco_demonstracao()
